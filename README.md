@@ -14,13 +14,6 @@ A real-time chat application with cyberpunk aesthetics, featuring room-based mes
 - **Mobile responsive design**
 - **Unread message counters**
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js (version 14 or higher)
-- npm or yarn
-
-
 ## 🎨 Features in Detail
 
 ### Chat Rooms
