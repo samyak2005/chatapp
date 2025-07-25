@@ -8,57 +8,94 @@
       crossorigin="anonymous"
     ></script>
     <link rel="stylesheet" href="index.css" />
-    <title>CHAT_APP</title>
+    <title>CyberChat 💙</title>
   </head>
   <body>
-    <h1>iChat 💭</h1>
-    <div class="main">
-      <div class="name">
-        <span><i class="far fa-user"></i></span>
-        <input
-          type="text"
-          id="name-input"
-          class="name-input"
-          value="anonymous"
-          maxlength="20"
-        />
+    <div class="app-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h1 class="logo">CyberChat</h1>
+          <div class="user-profile">
+            <div class="avatar">👤</div>
+            <input type="text" id="name-input" placeholder="Your name..." value="anonymous" maxlength="20" />
+          </div>
+        </div>
+        
+        <div class="rooms-section">
+          <h3>💬 Chat Rooms</h3>
+          <div class="room-list" id="room-list">
+            <div class="room-item active" data-room="general">
+              <span class="room-icon">🌐</span>
+              <span class="room-name">General</span>
+              <span class="room-count">0</span>
+            </div>
+            <div class="room-item" data-room="gaming">
+              <span class="room-icon">🎮</span>
+              <span class="room-name">Gaming</span>
+              <span class="room-count">0</span>
+            </div>
+            <div class="room-item" data-room="music">
+              <span class="room-icon">🎵</span>
+              <span class="room-name">Music</span>
+              <span class="room-count">0</span>
+            </div>
+            <div class="room-item" data-room="tech">
+              <span class="room-icon">💻</span>
+              <span class="room-name">Tech</span>
+              <span class="room-count">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="private-chats">
+          <h3>💌 Private Chats</h3>
+          <div class="private-list" id="private-list">
+            <!-- Private chats will be added here -->
+          </div>
+        </div>
+        
+        <div class="online-users">
+          <h3>👥 Online Users</h3>
+          <div class="users-list" id="users-list">
+            <!-- Users will be added here -->
+          </div>
+        </div>
       </div>
 
-      <ul class="message-container" id="message-container">
-        <!-- These li elements are only for reference, and therefore, they are commented out... -->
-        <!-- <li class="message-left">
-          <p class="message">
-            lorem impsun
-            <span>bluebird ● 26 July 10:40</span>
-          </p>
-        </li>
+      <!-- Main Chat Area -->
+      <div class="chat-area">
+        <div class="chat-header">
+          <div class="current-room">
+            <span class="room-icon" id="current-room-icon">🌐</span>
+            <span class="room-name" id="current-room-name">General</span>
+          </div>
+          <div class="room-stats">
+            <span class="online-count" id="online-count">0 online</span>
+          </div>
+        </div>
 
-        <li class="message-right">
-          <p class="message">
-            lorem impsun
-            <span>bluebird ● 26 July 10:40</span>
-          </p>
-        </li>
+        <div class="messages-container" id="message-container">
+          <!-- Messages will be added here -->
+        </div>
 
-        <li class="message-feedback">
-          <p class="feedback" id="feedback">✍️ killer is typing a message...</p>
-        </li> -->
-      </ul>
-
-      <form class="message-form" id="message-form">
-        <input
-          type="text"
-          name="message"
-          id="message-input"
-          class="message-input"
-        />
-        <div class="v-divider"></div>
-        <button type="submit" class="send-button">
-          send <span><i class="fas fa-paper-plane"></i></span>
-        </button>
-      </form>
+        <div class="chat-input-area">
+          <form class="message-form" id="message-form">
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="message-input"
+                placeholder="Type your message... 💙"
+                autocomplete="off"
+              />
+              <button type="submit" class="send-btn">
+                <span>🚀</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <h3 class="clients-total" id="client-total">Total clients: 2</h3>
 
     <script src="/socket.io/socket.io.js"></script>
     <script
