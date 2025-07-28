@@ -1,5 +1,6 @@
 const socket = io();
 
+// DOM Elements
 const messageContainer = document.getElementById("message-container");
 const nameInput = document.getElementById("name-input");
 const messageForm = document.getElementById("message-form");
@@ -11,19 +12,23 @@ const currentRoomIcon = document.getElementById("current-room-icon");
 const currentRoomName = document.getElementById("current-room-name");
 const onlineCount = document.getElementById("online-count");
 
+// State
 let currentRoom = "general";
 let currentUser = "anonymous";
 let users = new Set();
 let typingUsers = new Set();
-let privateChats = new Map();
-let currentChat = null;
-let unreadCounts = new Map();
-let messageReactions = new Map();
+let privateChats = new Map(); // Map of private chat data
+let currentChat = null; // null for rooms, user string for private chats
+let unreadCounts = new Map(); // Track unread messages per chat
+let messageReactions = new Map(); // Store reactions for each message
 
+// Audio
 const messageTone = new Audio("/message-tone.mp3");
 
+// Emoji reactions
 const availableEmojis = ["👍", "❤️", "😂", "😮", "😢", "🔥", "👏", "🎉", "💯", "✨", "🤔", "😍"];
 
+// Room data
 const rooms = {
   general: { icon: "🌐", name: "General", users: new Set() },
   gaming: { icon: "🎮", name: "Gaming", users: new Set() },
@@ -31,6 +36,7 @@ const rooms = {
   tech: { icon: "💻", name: "Tech", users: new Set() }
 };
 
+// Initialize
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   joinRoom("general");
@@ -38,11 +44,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function setupEventListeners() {
-  messageForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    sendMessage();
-  });
+messageForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  sendMessage();
+});
 
+  // Room switching
   roomList.addEventListener("click", (e) => {
     const roomItem = e.target.closest(".room-item");
     if (roomItem) {
@@ -51,6 +58,7 @@ function setupEventListeners() {
     }
   });
 
+  // Private chat switching
   privateList.addEventListener("click", (e) => {
     const privateItem = e.target.closest(".private-item");
     if (privateItem) {
@@ -59,6 +67,7 @@ function setupEventListeners() {
     }
   });
 
+  // User list - click to start private chat
   usersList.addEventListener("click", (e) => {
     const userItem = e.target.closest(".user-item");
     if (userItem) {
@@ -69,11 +78,13 @@ function setupEventListeners() {
     }
   });
 
+  // Name input
   nameInput.addEventListener("input", (e) => {
     currentUser = e.target.value || "anonymous";
     socket.emit("user-update", { name: currentUser, room: currentRoom });
   });
 
+  // Typing indicators
   messageInput.addEventListener("input", () => {
     if (currentChat) {
       socket.emit("typing", { 
@@ -106,6 +117,7 @@ function setupEventListeners() {
     }
   });
 
+  // Keyboard shortcuts
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey || e.metaKey) {
       switch (e.key) {
@@ -137,33 +149,42 @@ function setupEventListeners() {
 function switchToRoom(roomName) {
   if (roomName === currentRoom && !currentChat) return;
   
+  // Clear current chat
   currentChat = null;
   
+  // Leave current room/chat
   if (currentRoom !== roomName) {
     socket.emit("leave-room", currentRoom);
   }
   
+  // Update UI
   document.querySelectorAll(".room-item, .private-item").forEach(item => {
     item.classList.remove("active");
   });
   document.querySelector(`[data-room="${roomName}"]`).classList.add("active");
   
+  // Update header
   currentRoomIcon.textContent = rooms[roomName].icon;
   currentRoomName.textContent = rooms[roomName].name;
   
+  // Clear messages
   messageContainer.innerHTML = "";
   
+  // Join new room
   currentRoom = roomName;
   joinRoom(roomName);
   
+  // Add room join message
   addSystemMessage(`Joined ${rooms[roomName].name} room`);
 }
 
 function switchToPrivateChat(targetUser) {
   if (targetUser === currentChat) return;
   
+  // Clear current chat
   currentChat = targetUser;
   
+  // Update UI
   document.querySelectorAll(".room-item, .private-item").forEach(item => {
     item.classList.remove("active");
   });
@@ -172,11 +193,14 @@ function switchToPrivateChat(targetUser) {
     privateItem.classList.add("active");
   }
   
+  // Update header
   currentRoomIcon.textContent = "💌";
   currentRoomName.textContent = `Private: ${targetUser}`;
   
+  // Clear messages
   messageContainer.innerHTML = "";
   
+  // Load private chat messages
   if (privateChats.has(targetUser)) {
     const chatData = privateChats.get(targetUser);
     chatData.messages.forEach(msg => {
@@ -191,6 +215,7 @@ function switchToPrivateChat(targetUser) {
     });
   }
   
+  // Clear unread count
   unreadCounts.set(targetUser, 0);
   updatePrivateChatUI(targetUser);
   
@@ -202,6 +227,7 @@ function startPrivateChat(targetUser) {
     privateChats.set(targetUser, { messages: [], users: [currentUser, targetUser] });
   }
   
+  // Add to private chat list if not already there
   if (!document.querySelector(`[data-user="${targetUser}"]`)) {
     addPrivateChatToList(targetUser);
   }
@@ -210,6 +236,7 @@ function startPrivateChat(targetUser) {
 }
 
 function addPrivateChatToList(targetUser) {
+  // Check if already exists
   if (document.querySelector(`[data-user="${targetUser}"]`)) {
     return;
   }
@@ -268,6 +295,7 @@ function sendMessage() {
   addMessageToUI(true, data);
   messageInput.value = "";
   
+  // Store message in private chat if applicable
   if (currentChat) {
     if (!privateChats.has(currentChat)) {
       privateChats.set(currentChat, { messages: [], users: [currentUser, currentChat] });
@@ -279,11 +307,13 @@ function sendMessage() {
       messageId: messageId
     });
     
+    // Ensure private chat is in the list
     if (!document.querySelector(`[data-user="${currentChat}"]`)) {
       addPrivateChatToList(currentChat);
     }
   }
   
+  // Button animation
   const sendBtn = document.querySelector('.send-btn');
   sendBtn.style.transform = 'scale(0.9)';
   setTimeout(() => sendBtn.style.transform = 'scale(1)', 100);
@@ -296,6 +326,7 @@ function addMessageToUI(isOwnMessage, data) {
   messageDiv.className = `message ${isOwnMessage ? 'own' : 'other'}`;
   messageDiv.dataset.messageId = data.messageId;
   
+  // Add private class for private messages
   if (data.isPrivate || currentChat) {
     messageDiv.classList.add('private');
   }
@@ -320,6 +351,7 @@ function addMessageToUI(isOwnMessage, data) {
   messageDiv.appendChild(content);
   messageDiv.appendChild(info);
   
+  // Add reaction button
   const reactionBtn = document.createElement("button");
   reactionBtn.className = "reaction-btn";
   reactionBtn.innerHTML = "😀";
@@ -331,6 +363,7 @@ function addMessageToUI(isOwnMessage, data) {
   actionsDiv.appendChild(reactionBtn);
   messageDiv.appendChild(actionsDiv);
   
+  // Add reactions display
   const reactionsDiv = document.createElement("div");
   reactionsDiv.className = "message-reactions";
   reactionsDiv.dataset.messageId = data.messageId;
@@ -339,12 +372,14 @@ function addMessageToUI(isOwnMessage, data) {
   messageContainer.appendChild(messageDiv);
   scrollToBottom();
   
+  // Play sound for received messages
   if (!isOwnMessage) {
     messageTone.play();
   }
 }
 
 function showReactionPicker(messageId) {
+  // Remove existing picker
   const existingPicker = document.querySelector('.reaction-picker');
   if (existingPicker) {
     existingPicker.remove();
@@ -364,6 +399,7 @@ function showReactionPicker(messageId) {
     picker.appendChild(emojiBtn);
   });
   
+  // Position picker near the reaction button
   const reactionBtn = document.querySelector(`[data-message-id="${messageId}"] .reaction-btn`);
   if (reactionBtn) {
     const rect = reactionBtn.getBoundingClientRect();
@@ -375,6 +411,7 @@ function showReactionPicker(messageId) {
   
   document.body.appendChild(picker);
   
+  // Close picker when clicking outside
   setTimeout(() => {
     document.addEventListener('click', function closePicker(e) {
       if (!picker.contains(e.target)) {
@@ -400,6 +437,7 @@ function updateReactions(messageId, reactions) {
   if (reactionsDiv) {
     reactionsDiv.innerHTML = "";
     
+    // Group reactions by emoji
     const groupedReactions = {};
     reactions.forEach(reaction => {
       if (!groupedReactions[reaction.emoji]) {
@@ -408,6 +446,7 @@ function updateReactions(messageId, reactions) {
       groupedReactions[reaction.emoji].push(reaction.user);
     });
     
+    // Display grouped reactions
     Object.entries(groupedReactions).forEach(([emoji, users]) => {
       const reactionSpan = document.createElement("span");
       reactionSpan.className = "reaction";
@@ -514,19 +553,23 @@ function scrollToBottom() {
   messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
+// Socket event handlers
 socket.on("clients-total", (data) => {
   onlineCount.textContent = `${data} online`;
 });
 
 socket.on("chat-message", (data) => {
   if (data.isPrivate) {
+    // Handle private message
     const sender = data.name;
     if (sender !== currentUser) {
+      // Add to private chat if not already there
       if (!privateChats.has(sender)) {
         privateChats.set(sender, { messages: [], users: [currentUser, sender] });
         addPrivateChatToList(sender);
       }
       
+      // Add message to chat
       privateChats.get(sender).messages.push({
         from: sender,
         message: data.message,
@@ -534,12 +577,14 @@ socket.on("chat-message", (data) => {
         messageId: data.messageId
       });
       
+      // Increment unread count if not in this chat
       if (currentChat !== sender) {
         const currentUnread = unreadCounts.get(sender) || 0;
         unreadCounts.set(sender, currentUnread + 1);
         updatePrivateChatUI(sender);
       }
       
+      // Show message if in this chat
       if (currentChat === sender) {
         addMessageToUI(false, data);
       }
@@ -601,6 +646,7 @@ socket.on("room-users", (data) => {
   }
 });
 
+// Add some cyberpunk effects
 function addGlowEffect(element) {
   element.style.boxShadow = "0 0 20px rgba(0, 212, 255, 0.5)";
   setTimeout(() => {
@@ -608,6 +654,7 @@ function addGlowEffect(element) {
   }, 1000);
 }
 
+// Add random cyberpunk messages
 const cyberpunkMessages = [
   "🔥 System online and ready for action!",
   "💙 Neon lights are glowing tonight!",
@@ -617,8 +664,8 @@ const cyberpunkMessages = [
 ];
 
 setInterval(() => {
-  if (Math.random() < 0.1) {
+  if (Math.random() < 0.1) { // 10% chance every interval
     const randomMessage = cyberpunkMessages[Math.floor(Math.random() * cyberpunkMessages.length)];
     addSystemMessage(randomMessage);
-  }
-}, 30000);
+}
+}, 30000); // Every 30 seconds

@@ -20,6 +20,7 @@ body {
   width: 100vw;
 }
 
+/* Sidebar Styles */
 .sidebar {
   width: 300px;
   background: rgba(0, 0, 0, 0.8);
@@ -189,6 +190,7 @@ body {
   text-align: center;
 }
 
+/* Private Chats Section */
 .private-chats {
   margin-bottom: 20px;
   flex-shrink: 0;
@@ -328,6 +330,7 @@ body {
   50% { opacity: 0.5; }
 }
 
+/* Chat Area Styles */
 .chat-area {
   flex: 1;
   display: flex;
@@ -482,6 +485,7 @@ body {
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* Message Actions */
 .message-actions {
   display: flex;
   gap: 8px;
@@ -513,6 +517,7 @@ body {
   transform: scale(1.05);
 }
 
+/* Message Reactions */
 .message-reactions {
   display: flex;
   flex-wrap: wrap;
@@ -552,6 +557,7 @@ body {
   transform: scale(1.1);
 }
 
+/* Reaction Picker */
 .reaction-picker {
   display: flex;
   flex-wrap: wrap;
@@ -696,6 +702,7 @@ body {
   transform: scale(0.95);
 }
 
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .app-container {
     flex-direction: column;
@@ -729,8 +736,8 @@ body {
     flex-direction: column;
     text-align: center;
     padding: 10px;
-  }
-  
+}
+
   .private-chats {
     display: none;
   }
